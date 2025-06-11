@@ -7,7 +7,13 @@ const Stack = createNativeStackNavigator();
 export function AppNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false, 
+          animation: 'fade_from_bottom',
+        }}
+        initialRouteName='Home' 
+      >
         <Stack.Screen name='Home' component={HomeScreen} />
       </Stack.Navigator>
     </NavigationContainer>
