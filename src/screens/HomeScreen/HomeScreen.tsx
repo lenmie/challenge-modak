@@ -6,8 +6,17 @@ import { FlatList } from 'react-native';
 import { CommonScreenContainer } from '../../components/CommonScreenContainer';
 import { StyledText } from '../../components/StyledText';
 import ProductItem from './ProductItem';
+import { RootStackParamList } from '../../navigation/AppNavigator';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-export const HomeScreen: React.FC = () => {
+type HomeScreenNavigationProp = NativeStackScreenProps<RootStackParamList, 'Home'>;
+
+type HomeScreenProps = {
+  navigation: HomeScreenNavigationProp['navigation'];
+  route?: HomeScreenNavigationProp['route'];
+};
+
+export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { data, error, isLoading } = useGetProductsQuery();
 
   const products = data?.products;
@@ -29,7 +38,12 @@ export const HomeScreen: React.FC = () => {
             image={item.images?.[0]}
             price={item.price}
             thumbnail={item.thumbnail}
-          />
+            onPress={() =>
+              navigation.navigate('ProductDetail', {
+                product: item,
+              })
+            }
+          />  
         )}
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}

@@ -3,29 +3,31 @@ import styled from 'styled-components/native';
 import { Image } from 'react-native';
 import { StyledText } from '../../components/StyledText';
 
-const ProductItem = ({
+export const ProductItem = ({
   title,
   image,
   price,
   thumbnail,
+  onPress,
 }: {
   title: string;
   image?: string;
   price: number;
   thumbnail?: string;
+  onPress?: () => void;
 }) => (
-  <Container>
+  <PressableContainer onPress={onPress}>
     <ProductImage source={{ uri: thumbnail || image }} resizeMode="cover" />
     <InfoContainer>
       <Title>{title}</Title>
       <Price>${price}</Price>
     </InfoContainer>
-  </Container>
+  </PressableContainer>
 );
 
 export default ProductItem;
 
-const Container = styled.View`
+const PressableContainer = styled.TouchableOpacity`
   flex-direction: row;
   align-items: center;
   background-color: #f9f9f9;
