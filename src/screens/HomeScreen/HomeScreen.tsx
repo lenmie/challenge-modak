@@ -45,19 +45,45 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   const products = productsData?.products;
 
-  const filteredProducts =
-    products?.filter(product => {
-      if (!selectedCategory) return true;
-      return (
-        product.category.toLowerCase() === selectedCategory.name.toLowerCase()
-      );
-    }) || [];
+  const filteredProducts = React.useMemo(() => {
+    if (!products) return [];
+    if (!selectedCategory) return products;
+    return products.filter(product =>
+      product.category.toLowerCase() === selectedCategory.name.toLowerCase()
+    );
+  }, [products, selectedCategory]);
+
+  const [sortBy, setSortBy] = React.useState<'price' | 'rating' | undefined>();
+
+  const sortedProducts = React.useMemo(() => {
+    if (!filteredProducts) return [];
+    if (!sortBy) return filteredProducts;
+    return [...filteredProducts].sort((a, b) => {
+      if (sortBy === 'price') {
+        return a.price - b.price;
+      }
+      if (sortBy === 'rating') {
+        return (b.rating ?? 0) - (a.rating ?? 0);
+      }
+      return 0;
+    });
+  }, [filteredProducts, sortBy]);
 
   return (
     <CommonScreenContainer>
       <Header>
         <HeaderTitle>Product Store</HeaderTitle>
       </Header>
+
+      <Picker
+        selectedValue={sortBy}
+        onValueChange={itemValue => setSortBy(itemValue as 'price' | 'rating')}
+        style={styles.picker}
+      >
+        <Picker.Item label="Sort by" value="" />
+        <Picker.Item label="Price" value="price" />
+        <Picker.Item label="Rating" value="rating" />
+      </Picker>
 
       <Picker
         selectedValue={selectedCategory?.name}
@@ -80,7 +106,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       {productsLoading && <StyledText>Loading...</StyledText>}
       {productsError && <StyledText>Error loading products</StyledText>}
       <FlatList
-        data={filteredProducts}
+        data={sortedProducts}
         keyExtractor={item => item.id.toString()}
         renderItem={({ item }) => (
           <ProductItem
