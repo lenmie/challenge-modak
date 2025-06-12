@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { ProductsResponse } from './types';
+import { CategoriesResponse, ProductsResponse } from './types';
 
 const BASE_URL = 'https://dummyjson.com';
 
@@ -10,8 +10,11 @@ export const api = createApi({
         getProducts: builder.query<ProductsResponse, void>({
             query: () => '/products',
         }),
+        getCategories: builder.query<CategoriesResponse, void>({
+            query: () => '/products/categories',
+        }),
     }),
 });
 
-export const { useGetProductsQuery } = api;
+export const { useGetProductsQuery, useGetCategoriesQuery } = api;
 
