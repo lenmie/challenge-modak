@@ -85,6 +85,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         <Picker.Item label="Rating" value="rating" />
       </Picker>
 
+      {categoriesLoading && <StyledText>Loading categories...</StyledText>}
+      {categoriesError && <StyledText>Error loading categories</StyledText>}
       <Picker
         selectedValue={selectedCategory?.name}
         onValueChange={(itemValue, itemIndex) => {
