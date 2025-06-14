@@ -1,4 +1,4 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { LinkingOptions, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HomeScreen, ProductDetailScreen } from '../screens';
 import { Product } from '../store/api/types';
@@ -6,15 +6,33 @@ import { Product } from '../store/api/types';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export type RootStackParamList = {
-  Home: undefined;
+  Home: {
+    type: string;
+    value: string;
+  };
   ProductDetail: {
     product: Product;
   };
 };
 
+const linking: LinkingOptions<RootStackParamList> = {
+  prefixes: ['challenge-modak://', 'https://challenge-modak.com'],
+  config: {
+    screens: {
+      Home: {
+        path: ':type/:value',
+        parse: {
+          type: (type: string) => type,
+          value: (value: string) => value,
+        },
+      },
+    },
+  },
+};
+
 export function AppNavigator() {
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,

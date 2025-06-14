@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View } from 'react-native';
 import styled from 'styled-components/native';
 import {
@@ -12,8 +12,10 @@ import ProductItem from './ProductItem';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Category } from '../../store/api/types';
-import { Picker } from '@react-native-picker/picker';
-import { StyleSheet } from 'react-native';
+import GenericAlertModal from '../../components/GenericAlertModal';
+import { SortPicker } from './SortPicker';
+import { CategoryPicker } from './CategoryPicker';
+import { handleDeepLink } from './utils';
 
 type HomeScreenNavigationProp = NativeStackScreenProps<
   RootStackParamList,
@@ -25,7 +27,10 @@ type HomeScreenProps = {
   route?: HomeScreenNavigationProp['route'];
 };
 
-export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+export const HomeScreen: React.FC<HomeScreenProps> = ({
+  navigation,
+  route,
+}) => {
   const {
     data: productsData,
     error: productsError,
@@ -42,14 +47,27 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   } = useGetCategoriesQuery();
 
   const categories = categoriesData || [];
-
   const products = productsData?.products;
+  const { type, value } = route?.params || {};
+
+  const [error, setError] = React.useState<string | null>(null);
+
+  useEffect(() => {
+    if (productsError) {
+      setError('Failed to load products');
+    } else if (categoriesError) {
+      setError('Failed to load categories');
+    } else {
+      setError(null);
+    }
+  }, [productsError, categoriesError]);
 
   const filteredProducts = React.useMemo(() => {
     if (!products) return [];
     if (!selectedCategory) return products;
-    return products.filter(product =>
-      product.category.toLowerCase() === selectedCategory.name.toLowerCase()
+    return products.filter(
+      product =>
+        product.category.toLowerCase() === selectedCategory.name.toLowerCase(),
     );
   }, [products, selectedCategory]);
 
@@ -69,42 +87,43 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     });
   }, [filteredProducts, sortBy]);
 
+  useEffect(() => {
+    handleDeepLink({
+      type,
+      value,
+      categories,
+      products,
+      setSelectedCategory,
+      navigation,
+      setError,
+    });
+  }, [type, value, categories, products]);
+
   return (
     <CommonScreenContainer>
       <Header>
         <HeaderTitle>Product Store</HeaderTitle>
       </Header>
 
-      <Picker
-        selectedValue={sortBy}
-        onValueChange={itemValue => setSortBy(itemValue as 'price' | 'rating')}
-        style={styles.picker}
-      >
-        <Picker.Item label="Sort by" value="" />
-        <Picker.Item label="Price" value="price" />
-        <Picker.Item label="Rating" value="rating" />
-      </Picker>
+      <GenericAlertModal
+        isOpen={!!error}
+        title="Error"
+        message={error || ''}
+        onClose={() => setError(null)}
+        confirmText="OK"
+      />
+
+      <SortPicker sortBy={sortBy} setSortBy={setSortBy} />
 
       {categoriesLoading && <StyledText>Loading categories...</StyledText>}
       {categoriesError && <StyledText>Error loading categories</StyledText>}
-      <Picker
-        selectedValue={selectedCategory?.name}
-        onValueChange={(itemValue, itemIndex) => {
-          const category = categories[itemIndex - 1];
-          setSelectedCategory(category);
-        }}
-        style={styles.picker}
-      >
-        <Picker.Item label="All Categories" value="" />
-        {categories.map((category, index) => (
-          <Picker.Item
-            key={index}
-            label={category.name}
-            value={category.name}
-          />
-        ))}
-      </Picker>
-
+      <CategoryPicker
+        categories={categories}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        loading={categoriesLoading}
+        error={!!categoriesError}
+      />
       {productsLoading && <StyledText>Loading...</StyledText>}
       {productsError && <StyledText>Error loading products</StyledText>}
       <FlatList
@@ -146,20 +165,3 @@ const HeaderTitle = styled(StyledText)`
   font-weight: bold;
   color: #22223b;
 `;
-
-const styles = StyleSheet.create({
-  picker: {
-    height: 100,
-    width: '100%',
-    marginVertical: 16,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    paddingHorizontal: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-});
