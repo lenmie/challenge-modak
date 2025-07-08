@@ -2,7 +2,14 @@
 
 Please complete the challenge within the next 4 days and feel free to reach out if you have any questions or need clarification on any aspects. We look forward to reviewing your submission and discussing it further during our upcoming interview.
 
-challenge start: 10/6 2pm
+
+-----------------------------------------------------------------------------------
+
+steps to install
+
+- yarn install
+- npx expo prebuild --platform android
+- yarn android
 
 -----------------------------------------------------------------------------------
 Products App

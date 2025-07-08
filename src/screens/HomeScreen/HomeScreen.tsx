@@ -71,7 +71,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     );
   }, [products, selectedCategory]);
 
-  const [sortBy, setSortBy] = React.useState<'price' | 'rating' | undefined>();
+  const [sortBy, setSortBy] = React.useState('');
 
   const sortedProducts = React.useMemo(() => {
     if (!filteredProducts) return [];
@@ -115,8 +115,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
       <SortPicker sortBy={sortBy} setSortBy={setSortBy} />
 
-      {categoriesLoading && <StyledText>Loading categories...</StyledText>}
-      {categoriesError && <StyledText>Error loading categories</StyledText>}
       <CategoryPicker
         categories={categories}
         selectedCategory={selectedCategory}

@@ -1,6 +1,6 @@
-import React from 'react';
-import { Picker } from '@react-native-picker/picker';
-import { StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
 import { Category } from '../../store/api/types';
 import { StyledText } from '../../components/StyledText';
 
@@ -18,43 +18,65 @@ export const CategoryPicker: React.FC<CategoryPickerProps> = ({
   setSelectedCategory,
   loading,
   error,
-}) => (
-  <>
-    {loading && <StyledText>Loading categories...</StyledText>}
-    {error && <StyledText>Error loading categories</StyledText>}
-    <Picker
-      selectedValue={selectedCategory?.name}
-      onValueChange={(itemValue, itemIndex) => {
-        const category = categories[itemIndex - 1];
-        setSelectedCategory(category);
-      }}
-      style={styles.picker}
-    >
-      <Picker.Item label="All Categories" value="" />
-      {categories.map((category, index) => (
-        <Picker.Item
-          key={index}
-          label={category.name}
-          value={category.name}
-        />
-      ))}
-    </Picker>
-  </>
-);
+}) => {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(selectedCategory?.name || null);
+
+  const items = [
+    { label: 'All Categories', value: '' },
+    ...categories.map(category => ({
+      label: category.name,
+      value: category.name,
+    })),
+  ];
+
+  return (
+    <View style={styles.container}>
+      {loading && <StyledText>Loading categories...</StyledText>}
+      {error && <StyledText>Error loading categories</StyledText>}
+      <DropDownPicker
+        open={open}
+        value={value}
+        items={items}
+        setOpen={setOpen}
+        setValue={setValue}
+        onSelectItem={(item) => {
+          if (!item.value) {
+            setSelectedCategory(undefined);
+          } else {
+            const category = categories.find(cat => cat.name === item.value);
+            setSelectedCategory(category);
+          }
+        }}
+        style={styles.dropdown}
+        dropDownContainerStyle={styles.dropdownContainer}
+        textStyle={styles.text}
+        placeholder="Select a category"
+        searchable={false}
+        disabled={loading || error}
+      />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-  picker: {
-    height: 100,
-    width: '100%',
+  container: {
     marginVertical: 16,
+    zIndex: 10,
+  },
+  dropdown: {
     backgroundColor: '#fff',
-    borderRadius: 8,
-    borderWidth: 1,
     borderColor: '#ddd',
-    paddingHorizontal: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    borderRadius: 8,
+    height: 50,
+  },
+  dropdownContainer: {
+    backgroundColor: '#fff',
+    borderColor: '#ddd',
+    borderRadius: 8,
+  },
+  text: {
+    fontSize: 16,
+    color: '#333',
   },
 });

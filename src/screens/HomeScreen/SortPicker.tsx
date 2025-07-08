@@ -1,40 +1,64 @@
-import React from 'react';
-import { Picker } from '@react-native-picker/picker';
-import { StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 type SortPickerProps = {
-  sortBy: 'price' | 'rating' | undefined;
-  setSortBy: (value: 'price' | 'rating' | undefined) => void;
+  sortBy: string;
+  setSortBy: (value: string) => void;
 };
 
 export const SortPicker: React.FC<SortPickerProps> = ({
   sortBy,
   setSortBy,
-}) => (
-  <Picker
-    selectedValue={sortBy}
-    onValueChange={itemValue => setSortBy(itemValue as 'price' | 'rating')}
-    style={styles.picker}
-  >
-    <Picker.Item label="Sort by" value="" />
-    <Picker.Item label="Price" value="price" />
-    <Picker.Item label="Rating" value="rating" />
-  </Picker>
-);
+}) => {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(sortBy);
+
+  const items = [
+    { label: 'Sort by', value: '' },
+    { label: 'Price', value: 'price' },
+    { label: 'Rating', value: 'rating' },
+  ];
+
+  return (
+    <View style={styles.container}>
+      <DropDownPicker
+        open={open}
+        value={value}
+        items={items}
+        setOpen={setOpen}
+        setValue={setValue}
+        onSelectItem={item => {
+          setSortBy(item.value as 'price' | 'rating');
+        }}
+        style={styles.dropdown}
+        dropDownContainerStyle={styles.dropdownContainer}
+        textStyle={styles.text}
+        placeholder="Sort by"
+        searchable={false}
+      />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-  picker: {
-    height: 100,
-    width: '100%',
+  container: {
     marginVertical: 16,
+    zIndex: 15,
+  },
+  dropdown: {
     backgroundColor: '#fff',
-    borderRadius: 8,
-    borderWidth: 1,
     borderColor: '#ddd',
-    paddingHorizontal: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    borderRadius: 8,
+    height: 50,
+  },
+  dropdownContainer: {
+    backgroundColor: '#fff',
+    borderColor: '#ddd',
+    borderRadius: 8,
+  },
+  text: {
+    fontSize: 16,
+    color: '#333',
   },
 });
